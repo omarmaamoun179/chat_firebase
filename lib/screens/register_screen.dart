@@ -80,21 +80,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(
                   height: 15,
                 ),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm Password',
-                    hintText: 'Enter your password again',
-                  ),
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                TextField(
-                  readOnly: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Upload Image',
-                  ),
-                ),
                 BlocBuilder<AuthCubit, AuthState>(
                   builder: (context, state) {
                     return state is AuthLoading
@@ -105,7 +90,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             onPressed: () {
                               log('Register button pressed ${nameController.text} ${emailController.text} ${passwordController.text} ${confirmPasswordController.text}');
                               context.read<AuthCubit>().register(
-                                
                                     name: nameController.text,
                                     email: emailController.text,
                                     password: passwordController.text,

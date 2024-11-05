@@ -1,7 +1,7 @@
 import 'package:chat_firebase/constant/constance.dart';
 import 'package:chat_firebase/cubit/auth_cubit.dart';
 import 'package:chat_firebase/cubit/auth_state.dart';
-import 'package:chat_firebase/screens/chat_screen.dart';
+import 'package:chat_firebase/screens/all_chats_.dart';
 import 'package:chat_firebase/screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> storeToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token);
-    
+
     Constance.token = token;
   }
 
@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
               String? token = await state.user.getIdToken();
               if (token != null) {
                 await storeToken(token);
-                Navigator.pushNamed(context, ChatScreen.ChatRoute);
+                Navigator.pushNamed(context, AllChat.allChatRoute);
               }
             }
           },

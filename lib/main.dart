@@ -6,6 +6,7 @@ import 'package:chat_firebase/constant/constance.dart';
 import 'package:chat_firebase/cubit/auth_cubit.dart';
 import 'package:chat_firebase/cubit/chat_cubit.dart';
 import 'package:chat_firebase/firebase_options.dart';
+import 'package:chat_firebase/screens/all_chats_.dart';
 import 'package:chat_firebase/screens/chat_screen.dart';
 import 'package:chat_firebase/screens/login_screen.dart';
 import 'package:chat_firebase/screens/register_screen.dart';
@@ -38,20 +39,22 @@ class ChatApp extends StatelessWidget {
           create: (context) => AuthCubit(),
         ),
         BlocProvider(
-          create: (context) => ChatCubit()
-            ..fetchMessages()
-            ..getUsers(),
+          create: (context) => ChatCubit()..getUsers(),
         ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         initialRoute: (Constance.token?.isNotEmpty ?? false)
-            ? ChatScreen.ChatRoute
+            ? AllChat.allChatRoute
             : LoginScreen.loginRoute,
         routes: {
+          AllChat.allChatRoute: (context) => const AllChat(),
           LoginScreen.loginRoute: (context) => const LoginScreen(),
           RegisterScreen.registerRoute: (context) => const RegisterScreen(),
-          ChatScreen.ChatRoute: (context) => ChatScreen(),
+          ChatScreen.ChatRoute: (context) => ChatScreen(
+                otherUserId:
+                    ModalRoute.of(context)!.settings.arguments as String,
+              ),
         },
       ),
     );

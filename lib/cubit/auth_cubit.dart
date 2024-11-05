@@ -57,7 +57,6 @@ class AuthCubit extends Cubit<AuthState> {
         email: email,
         password: password,
       );
-      log("UserName : ${credential.user!.displayName}");
 
       return emit(AuthSuccess(credential.user!));
     } catch (e) {

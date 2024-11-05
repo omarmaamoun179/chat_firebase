@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chat_firebase/cache_helper.dart';
 import 'package:chat_firebase/cubit/auth_cubit.dart';
 import 'package:chat_firebase/cubit/chat_cubit.dart';
@@ -6,19 +8,41 @@ import 'package:chat_firebase/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ChatScreen extends StatelessWidget {
-  final _controller = TextEditingController();
+class ChatScreen extends StatefulWidget {
   static String ChatRoute = '/chat';
 
-  ChatScreen({super.key});
+  final String otherUserId;
+
+  const ChatScreen({super.key, required this.otherUserId});
+
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  final _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final currentUserId = context.read<AuthCubit>().user!.uid;
+    log("Other User ID: ${widget.otherUserId}");
+    context.read<ChatCubit>().fetchMessages(currentUserId, widget.otherUserId);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final userId = context.read<AuthCubit>().user;
+    final currentUserId = context.read<AuthCubit>().user?.uid;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat App with Cubit'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: const Text('Chat'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -38,6 +62,7 @@ class ChatScreen extends StatelessWidget {
         children: [
           Expanded(
             child: BlocBuilder<ChatCubit, ChatState>(
+              buildWhen: (previous, current) => current is ChatLoaded,
               builder: (ctx, chatState) {
                 if (chatState is ChatLoading) {
                   return const Center(child: CircularProgressIndicator());
@@ -48,9 +73,10 @@ class ChatScreen extends StatelessWidget {
                     itemBuilder: (ctx, index) {
                       final message = chatState.messages[index];
                       return MessageBubble(
-                        date: message['createdAt'].toString(),
-                        message['message'],
-                        message['userId'] == userId,
+                        date: message['timestamp'].toDate().toString(),
+                        message: message['messageText'] ??
+                            'No message content', // استخدام قيمة افتراضية
+                        isMe: message['senderId'] == currentUserId,
                       );
                     },
                   );
@@ -75,9 +101,11 @@ class ChatScreen extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.send),
                   onPressed: () {
-                    context
-                        .read<ChatCubit>()
-                        .sendMessage(_controller.text, userId!.uid);
+                    context.read<ChatCubit>().sendMessage(
+                          _controller.text,
+                          currentUserId ?? '',
+                          widget.otherUserId,
+                        );
                     _controller.clear();
                   },
                 ),
@@ -95,7 +123,11 @@ class MessageBubble extends StatelessWidget {
   final bool isMe;
   final String date;
 
-  const MessageBubble(this.message, this.isMe, {super.key, required this.date});
+  const MessageBubble(
+      {required this.message,
+      required this.isMe,
+      required this.date,
+      super.key});
 
   @override
   Widget build(BuildContext context) {
